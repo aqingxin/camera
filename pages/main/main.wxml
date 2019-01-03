@@ -1,0 +1,7 @@
+<view class='main'>
+  <view class='main-content'>
+    <view>
+      <image class='mainBg' src='{{imgSrc}}' bindload="imageLoad" style="width:{{imgW}}px;height:{{imgH}}px;"></image>
+    </view>
+  </view>
+</view>
