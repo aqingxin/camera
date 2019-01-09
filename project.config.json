@@ -8,12 +8,13 @@
 		"es6": true,
 		"postcss": true,
 		"minified": true,
-		"newFeature": true
+		"newFeature": true,
+		"autoAudits": false
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.3.0",
+	"libVersion": "2.4.2",
 	"appid": "wx13fcc1f0ef0b423a",
-	"projectname": "camera",
+	"projectname": "canvasCamera",
 	"debugOptions": {
 		"hidedInDevtools": []
 	},

@@ -1,7 +1,26 @@
 <view class='main'>
   <view class='main-content'>
-    <view>
-      <image class='mainBg' src='{{imgSrc}}' bindload="imageLoad" style="width:{{imgW}}px;height:{{imgH}}px;"></image>
+    <image src='{{tmpImg}}' class='main-img' bindload='mainImgLoad' style='width:{{imgWidth}}px;height:{{imgHeight}}px'></image>
+    <image wx:for="{{choseImg}}" wx:key="index" src="../../static/images/{{item.src}}" class='chose-img' id="choseImg{{index}}" data-index="{{index}}" bindload='choseImgLoad' style='transform:translate(-50%,-50%) rotateY({{item.flip}}) rotate({{item.rotate}}deg)'></image>
+  </view>
+  <view class='operation-box' style="transform:rotate({{choseImg[imgIndex].rotate}}deg) translate(-50%,-50%)">
+    <view class='close' bindtap='closeChoseImg'>
+      <image src='../../static/images/close.png'></image>
+    </view>
+    <view class='rotate'  bindtouchmove='rotateImgMove' bindtouchstart='rotateStart'>
+      <image src='../../static/images/rotate.png'></image>
+    </view>
+    <view class='flip' bindtap='flipChoseImg'>
+      <image src='../../static/images/flip.png'></image>
+    </view>
+    <view class='scale'>
+      <image src='../../static/images/scale.png'></image>
+    </view>
+  </view>
+  <view class='img-drawer' style='transform:translateY({{arrowPosition}})'>
+    <image class='arrow' src='../../static/images/arrow_down.png'  bindtap='changeArrow' style='transform:rotateX({{arrowRotate}}) translateX(-50%)'></image>
+    <view class='img-content'>
+      <image wx:for="{{imgArr}}" src='../../static/images/{{item.src}}' wx:key="index"  data-index='{{index}}' bindtap='selectImg'></image>
     </view>
   </view>
 </view>

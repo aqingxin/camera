@@ -1,27 +1,40 @@
 /**index.wxss**/
-.userinfo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
 
-.userinfo-avatar {
-  width: 128rpx;
-  height: 128rpx;
-  margin: 20rpx;
-  border-radius: 50%;
+.container {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
-
-.userinfo-nickname {
-  color: #aaa;
-}
-
-.usermotto {
-  margin-top: 200px;
-}
-.start-btn {
+.canvas {
   position: absolute;
-  bottom: 100rpx;
-  background: #3367D6;
-  color: #fff;
+  top: -100000vh;
+  left: 0;
+  /* z-index: -1; */
+}
+.picture {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  /* display: none; */
+
+  /* transform: translateX(-10000px); */
+}
+.box {
+  position: absolute;
+  width: 50px;
+  height:50px;
+  background: red;
+}
+.minBox {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background: yellow;
+}
+.selectImg {
+  position: absolute;
+  bottom: 120rpx;
 }
