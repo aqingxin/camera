@@ -1,26 +1,36 @@
 <view class='main'>
   <view class='main-content'>
-    <image src='{{tmpImg}}' class='main-img' bindload='mainImgLoad' style='width:{{imgWidth}}px;height:{{imgHeight}}px'></image>
-    <image wx:for="{{choseImg}}" wx:key="index" src="../../static/images/{{item.src}}" class='chose-img' id="choseImg{{index}}" data-index="{{index}}" bindload='choseImgLoad' style='transform:translate(-50%,-50%) rotateY({{item.flip}}) rotate({{item.rotate}}deg)'></image>
+    <!-- 主图 -->
+    <image src='{{tmpImg}}' class='main-img' bindload='mainImgLoad' style='width:{{imgWidth}}px;height:{{imgHeight}}px' bindtap='hideBox'></image>
+    <!-- 头像贴纸 -->
+    <image wx:for="{{choseImg}}" wx:key="index" src="../../static/images/{{item.src}}" class='chose-img' id="choseImg{{index}}" data-index="{{index}}" bindload='choseImgLoad' style='transform:translate(-50%,-50%) rotateY({{item.flip}}) rotate({{item.rotate}}deg) scale({{item.scale}}); top:{{item.top}}px;left:{{item.left}}px' bindtap='selectChoseImg'></image>
   </view>
-  <view class='operation-box' style="transform:rotate({{choseImg[imgIndex].rotate}}deg) translate(-50%,-50%)">
+
+  <!-- 对头像贴纸操作的盒子 -->
+  <view class='operation-box' style="transform:rotate({{choseImg[imgIndex].rotate}}deg) scale({{choseImg[imgIndex].scale}});top:{{boxStyle.top}}px;left:{{boxStyle.left}}px" wx:if="{{boxShow}}" bindtouchstart='choseImgStart' bindtouchmove='choseImgMove'>
     <view class='close' bindtap='closeChoseImg'>
       <image src='../../static/images/close.png'></image>
     </view>
-    <view class='rotate'  bindtouchmove='rotateImgMove' bindtouchstart='rotateStart'>
+    <view class='rotate'  catchtouchmove='rotateImgMove' catchtouchstart='rotateStart'>
       <image src='../../static/images/rotate.png'></image>
     </view>
     <view class='flip' bindtap='flipChoseImg'>
       <image src='../../static/images/flip.png'></image>
     </view>
-    <view class='scale'>
+    <view class='scale' catchtouchmove='scaleChoseImg'>
       <image src='../../static/images/scale.png'></image>
     </view>
   </view>
+
+  <!-- 头像贴纸素材 -->
   <view class='img-drawer' style='transform:translateY({{arrowPosition}})'>
     <image class='arrow' src='../../static/images/arrow_down.png'  bindtap='changeArrow' style='transform:rotateX({{arrowRotate}}) translateX(-50%)'></image>
     <view class='img-content'>
       <image wx:for="{{imgArr}}" src='../../static/images/{{item.src}}' wx:key="index"  data-index='{{index}}' bindtap='selectImg'></image>
     </view>
   </view>
+
+  <button class='success-btn' bindtap='success'>完成</button>
+  <canvas class='canvas' style='width:100vw;height:100vh;' canvas-id='main-canvas'></canvas>
+  <image src='{{successImg}}' wx:if="{{successShow}}" style='position:absolute;top:0;left:0'></image>
 </view>

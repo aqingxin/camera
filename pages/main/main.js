@@ -1,5 +1,5 @@
 // pages/main/main.js
-
+var ctx = wx.createCanvasContext('main-canvas',this)
 Page({
 
   /**
@@ -14,9 +14,9 @@ Page({
     arrowPosition:'0%',
     arrowRotate:'0deg',
     imgArr:[
-      { src: '1.png', rotate: 0, flip: '0deg', scale: '1' },
-      { src: '2.png', rotate: 0, flip: '0deg', scale: '1' },
-      { src: '3.png', rotate: 0, flip: '0deg', scale: '1' },
+      { src: '1.png', rotate: 0, flip: '0deg', scale: 1, top: 0, left: 0},
+      { src: '2.png', rotate: 0, flip: '0deg', scale: 1, top: 0, left: 0},
+      { src: '3.png', rotate: 0, flip: '0deg', scale: 1, top: 0, left: 0},
     ],
     choseImg:[],
     imgIndex:null,
@@ -24,6 +24,14 @@ Page({
     startY: null,
     moveX: null,
     moveY: null,
+    boxShow:false,  //操作头像贴纸的盒子 显示与否  
+    boxStyle: { top: 0, left: 0 },    //操作头像贴纸的盒子  样式
+    choseStartX:null,
+    choseStartY: null,
+    canvasW:0,
+    canvasH:0,
+    successImg:'',
+    successShow:false
   },
 
   /**
@@ -33,12 +41,24 @@ Page({
     this.setData({    //设置图片路径
       tmpImg:options.img
     })
+    wx.createSelectorQuery().select('.main').boundingClientRect().exec(ev=>{
+      // console.log(ev)
+      let tmpArr=this.data.imgArr;
+      tmpArr.map(item=>{
+        item.top = ev[0].height / 2;
+        item.left = ev[0].width / 2;
+      })
+      this.setData({
+        imgArr:tmpArr
+      })
+    })
   },
 
   mainImgLoad(e){    //图片加载完执行该函数
     var query=wx.createSelectorQuery();
     var tmpWidth = e.detail.width;
     var tmpHeight = e.detail.height;
+    console.log(e.detail)
     var _this=this;
     query.select('.main-content').boundingClientRect().exec(function(ev){
       // console.log(ev)
@@ -48,7 +68,9 @@ Page({
         imgWidth:ev[0].width,      //设置图片的显示大小，使其自适应
         imgHeight: tmpHeight * ev[0].width/tmpWidth
       })
+      console.log(ev[0].width,ev[0].height,tmpWidth,tmpHeight)
     })
+    this.drawMain(this.data.tmpImg, e.detail.width, e.detail.height)
   },
   changeArrow(){  //贴纸素材容器的样式
     if (this.data.arrowPosition==='0%'){
@@ -70,7 +92,23 @@ Page({
     tmpArr.push(tmpImg[e.target.dataset.index]);
     this.setData({
       choseImg: tmpArr,
+      boxShow:true
     })
+    if(this.data.choseImg.length>0){
+      this.setData({
+        imgIndex:this.data.choseImg.length-1,
+      })
+      wx.createSelectorQuery().select(`#choseImg${this.data.imgIndex}`).boundingClientRect().exec(ev=>{
+        // console.log(ev)
+        let tmpObj={
+          top:ev[0].top-6,
+          left: ev[0].left-5,
+        }
+        this.setData({
+          boxStyle:tmpObj  
+        })
+      })
+    }
   },
   choseImgLoad(e){
     // console.log(e)
@@ -81,10 +119,27 @@ Page({
   closeChoseImg() {   //删除已选择的头像贴纸
     let tmpArr=this.data.choseImg;
     tmpArr.splice(this.data.imgIndex,1);
+   
     this.setData({
       choseImg:tmpArr,
       imgIndex: this.data.imgIndex-1
     })
+    // let tmpArr = this.data.choseImg;
+    if(this.data.imgIndex>=0){
+      let tmpObj = {
+        top: tmpArr[this.data.imgIndex].top - 50,
+        left: tmpArr[this.data.imgIndex].left - 50,
+      }
+      this.setData({
+        boxStyle: tmpObj
+      })
+    }
+
+    if (this.data.choseImg.length===0){   //当主要的区域的头像贴纸数为0时，操作贴纸的盒子不显示
+      this.setData({
+        boxShow:false
+      })
+    }
   },
   flipChoseImg(){    //水平翻转头像贴纸
     var query = wx.createSelectorQuery();
@@ -106,7 +161,6 @@ Page({
 
   },
   rotateStart(e) {  
-    console.log(e)
     this.setData({
       startX: e.changedTouches[0].pageX,
       startY: e.changedTouches[0].pageY,
@@ -118,8 +172,6 @@ Page({
     let pageX=e.changedTouches[0].pageX;
     let pageY = e.changedTouches[0].pageY;
     query.select(`#choseImg${this.data.imgIndex}`).boundingClientRect().exec(function (ev) {
-      // console.log(ev)
-      
       let tmp = _this.data.choseImg;
       tmp[ev[0].dataset.index].rotate = Math.atan2(pageY - _this.data.startY, pageX  - _this.data.startX  ) / Math.PI * 180
       _this.setData({
@@ -128,6 +180,118 @@ Page({
         moveY:pageY
       })
     })
+  },
+  scaleChoseImg(e){   //放大头像贴纸
+    var query = wx.createSelectorQuery();
+    let tmp=this.data.choseImg;
+    var _this = this;
+    query.select(`#choseImg${this.data.imgIndex}`).boundingClientRect().exec(function (ev) {
+      let tmp = _this.data.choseImg;
+      if (e.touches[0].pageX>_this.data.moveX && e.touches[0].pageY>_this.data.moveY){
+        // console.log('dd')
+        tmp[ev[0].dataset.index].scale += 0.01
+      }else{
+        tmp[ev[0].dataset.index].scale -= 0.01 
+      }
+      _this.setData({
+        choseImg: tmp,
+        moveX: e.touches[0].pageX,
+        moveY: e.touches[0].pageY
+      })
+    })
+    return false;
+  },
+  choseImgStart(e) {
+    // console.log(e)
+    this.setData({
+      choseStartX: e.touches[0].pageX,
+      choseStartY: e.touches[0].pageY,
+    })
+  },
+  choseImgMove(e) {   //头像贴纸移动，所在的白色框的盒子也一起移动
+    console.log(1)
+    // console.log(e)
+    let tmpObj={
+      top: e.touches[0].pageY-45,
+      left: e.touches[0].pageX-45
+    }
+    let tmpArr=this.data.choseImg;
+    tmpArr[this.data.imgIndex].top = e.touches[0].pageY+6;
+    tmpArr[this.data.imgIndex].left = e.touches[0].pageX+5;
+    this.setData({
+      boxStyle:tmpObj,
+      choseImg:tmpArr
+    })
+    return false;
+  },
+  selectChoseImg(e){   //点击已选择头像贴纸，让白色框的盒子的位置等于所点击的头像贴纸的位置
+    let tmpArr=this.data.choseImg;
+    let tmpObj={
+      top: tmpArr[e.target.dataset.index].top-50,
+      left: tmpArr[e.target.dataset.index].left-50,
+    }
+    this.setData({
+      boxShow:true,
+      imgIndex:e.target.dataset.index,
+      boxStyle:tmpObj
+    })
+  },
+  hideBox() {   //点击主图时 隐藏白色框的盒子
+    this.setData({
+      boxShow:false
+    })
+  },
+  drawMain(imgSrc,imgWidth,imgHeight){   //画主图
+    let canvasW = 0;
+    let canvasH = 0;
+    wx.createSelectorQuery().select('.canvas').boundingClientRect().exec(ev=>{
+      this.setData({
+        canvasW: ev[0].width,
+        canvasH: ev[0].height
+      })
+      ctx.drawImage(imgSrc, 0, (ev[0].height-imgHeight*ev[0].width/imgWidth)/2,ev[0].width,imgHeight*ev[0].width/imgWidth);
+      ctx.draw();
+
+      
+    })
+
+  },
+  success(){
+    let tmpArr = this.data.choseImg;
+    for (let i = 0; i < tmpArr.length; i++) {
+      wx.getImageInfo({
+        src: `../../static/images/${tmpArr[i].src}`,
+        success: res => {
+          ctx.save();
+          ctx.translate(this.data.canvasW / 2, this.data.canvasH / 2);
+          ctx.rotate(tmpArr[i].rotate * Math.PI / 180);
+          ctx.translate(-this.data.canvasW / 2, -this.data.canvasH / 2);
+          ctx.drawImage(`../../static/images/${tmpArr[i].src}`, tmpArr[i].left - 45, tmpArr[i].top - 45, 90, 90);
+          ctx.draw(true);
+          ctx.restore();
+          setTimeout(()=>{
+            wx.canvasToTempFilePath({
+              width: this.data.canvasW,
+              height: this.data.canvasH,
+              destWidth: this.data.originalWidth,
+              desHeight: this.data.originalHeight,
+              canvasId: 'main-canvas',
+              success: res => {
+                console.log(res)
+                this.setData({
+                  successImg: res.tempFilePath,
+                  successShow: true
+                })
+              }
+            }, this)
+          },1000)
+        },
+        fail: err => {
+          console.log(err)
+        }
+      })
+    }
+    
   },
   /**
    * 生命周期函数--监听页面初次渲染完成

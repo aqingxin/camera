@@ -58,7 +58,7 @@
   width: 200rpx;
   height: 200rpx;
   border: 1px solid #fff;
-  transform-origin: 0 0;
+  transform-origin: 50% 50%;
 }
 .operation-box view {
   position: absolute;
@@ -90,4 +90,15 @@
 .scale {
   bottom: -40rpx;
   right: -40rpx;
+}
+.canvas {
+  position: absolute;
+  left: 0;
+  top: -100000px;
+  z-index: -99;
+}
+.success-btn {
+  position: absolute;
+  right: 50rpx;
+  bottom: 50rpx;
 }
