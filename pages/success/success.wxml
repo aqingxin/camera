@@ -1,2 +1,5 @@
 <!--pages/success/success.wxml-->
-<text>pages/success/success.wxml</text>
+<view>
+  <image src='{{imgPath}}'></image>
+  <button bindtap='save'>下载</button>
+</view>

@@ -31,6 +31,6 @@
   </view>
 
   <button class='success-btn' bindtap='success'>完成</button>
-  <canvas class='canvas' style='width:100vw;height:100vh;' canvas-id='main-canvas'></canvas>
-  <image src='{{successImg}}' wx:if="{{successShow}}" style='position:absolute;top:0;left:0'></image>
+  <canvas class='canvas' style='width:{{originalWidth}}px;height:{{originalHeight}}px;' canvas-id='main-canvas'></canvas>
+  <image src='{{successImg}}' wx:if="{{successShow}}" mode='widthFix' style='position:absolute;top:0;left:0'></image>
 </view>

@@ -60,16 +60,21 @@ Page({
     var tmpHeight = e.detail.height;
     console.log(e.detail)
     var _this=this;
-    query.select('.main-content').boundingClientRect().exec(function(ev){
+
+    query.select('.main-content').boundingClientRect().exec(ev=>{
       // console.log(ev)
-      _this.setData({
+      this.setData({
         originalHeight: e.detail.height,    //设置图片原大小
         originalWidth: e.detail.width,
+
         imgWidth:ev[0].width,      //设置图片的显示大小，使其自适应
+        // 变量分别为：图片原高度，外层view宽度即屏幕宽度，图片原宽度
         imgHeight: tmpHeight * ev[0].width/tmpWidth
+
       })
-      console.log(ev[0].width,ev[0].height,tmpWidth,tmpHeight)
     })
+
+
     this.drawMain(this.data.tmpImg, e.detail.width, e.detail.height)
   },
   changeArrow(){  //贴纸素材容器的样式
@@ -86,9 +91,10 @@ Page({
     }
   },
   selectImg(e){  //从素材中选择贴纸，在显示到主要区域中
-    console.log(e)
+    // console.log(e)
     let tmpArr = this.data.choseImg;
-    let tmpImg = JSON.parse(JSON.stringify(this.data.imgArr));   //深拷贝的一种技巧，防止修改数据时把源数据也一起修改了
+
+    let tmpImg = JSON.parse(JSON.stringify(this.data.imgArr));   //拷贝数组的一种技巧，防止修改数据时把源数据也一起修改了
     tmpArr.push(tmpImg[e.target.dataset.index]);
     this.setData({
       choseImg: tmpArr,
@@ -209,7 +215,6 @@ Page({
     })
   },
   choseImgMove(e) {   //头像贴纸移动，所在的白色框的盒子也一起移动
-    console.log(1)
     // console.log(e)
     let tmpObj={
       top: e.touches[0].pageY-45,
@@ -249,14 +254,18 @@ Page({
         canvasW: ev[0].width,
         canvasH: ev[0].height
       })
-      ctx.drawImage(imgSrc, 0, (ev[0].height-imgHeight*ev[0].width/imgWidth)/2,ev[0].width,imgHeight*ev[0].width/imgWidth);
+      // ctx.drawImage(imgSrc, 0, (ev[0].height-imgHeight*ev[0].width/imgWidth)/2,ev[0].width,imgHeight*ev[0].width/imgWidth);
+      ctx.drawImage(imgSrc, 0, 0, imgWidth, imgHeight);
+
       ctx.draw();
-
-      
     })
-
   },
   success(){
+    // ctx.clearRect();
+    // this.dw
+    wx.showLoading({
+      title: '生成图片中',
+    })
     let tmpArr = this.data.choseImg;
     for (let i = 0; i < tmpArr.length; i++) {
       wx.getImageInfo({
@@ -264,23 +273,33 @@ Page({
         success: res => {
           ctx.save();
           ctx.translate(this.data.canvasW / 2, this.data.canvasH / 2);
-          ctx.rotate(tmpArr[i].rotate * Math.PI / 180);
+          ctx.rotate(45 * Math.PI / 180);
+          // ctx.scale(-1,1);
+
+          ctx.drawImage(`../../static/images/${tmpArr[i].src}`, (tmpArr[i].left - 45)*5.12, (tmpArr[i].top - 45), 90*5.12, 90*5.12);
           ctx.translate(-this.data.canvasW / 2, -this.data.canvasH / 2);
-          ctx.drawImage(`../../static/images/${tmpArr[i].src}`, tmpArr[i].left - 45, tmpArr[i].top - 45, 90, 90);
+          
           ctx.draw(true);
           ctx.restore();
           setTimeout(()=>{
-            wx.canvasToTempFilePath({
-              width: this.data.canvasW,
-              height: this.data.canvasH,
+            console.log(this.data.originalHeight)
+            wx.canvasToTempFilePath({    //微信官方API，将canvas保存为图片并且存到相册
+              x:0,
+              y:0,
+              width: this.data.originalWidth,
+              height: 1080,  //测试数据，暂时定死
               destWidth: this.data.originalWidth,
-              desHeight: this.data.originalHeight,
+              desHeight: 1080, //测试数据，暂时定死
               canvasId: 'main-canvas',
               success: res => {
+                wx.hideLoading();
                 console.log(res)
                 this.setData({
                   successImg: res.tempFilePath,
                   successShow: true
+                })
+                wx.navigateTo({
+                  url: '../success/success?imgPath='+res.tempFilePath,
                 })
               }
             }, this)
