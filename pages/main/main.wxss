@@ -1,104 +1,67 @@
 /* pages/main/main.wxss */
-.main {
+page {
+  overflow: hidden;
+}
+.container {
   width: 100vw;
   height: 100vh;
-}
-.main-content {
-  width: 100%;
-  height: 100%;
-  /* position: absolute; */
+  overflow: hidden;
 }
 .main-img {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
 }
-.img-drawer {
+.sticker {
   position: absolute;
   left: 0;
   bottom: 0;
   width: 100%;
   height: 400rpx;
-  background: #010101;
+  background: #3d3d3d;
+  transition: .3s;
 }
-.arrow {
+.sticker-arrow {
   position: absolute;
   left: 50%;
-  top: 5px;
   transform: translateX(-50%);
+  /* margin-left: -50%; */
   width: 60rpx;
   height: 60rpx;
+  transition: .3s;
 }
-.img-content {
-  width: 100%;
-  height: 335rpx;
+.sticker-hide {
+  bottom: -320rpx;
+}
+.sticker-main {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  margin-top: 65rpx;
+  justify-content: space-around;
+  margin-top: 60rpx;
 }
-.img-content image {
+.sticker-main image {
   width: 120rpx;
   height: 120rpx;
 }
-.chose-img {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  width: 180rpx;
-  height: 180rpx;
+.touchActive {
+  border:  1px dashed #fff;
 }
-.operation-box {
+.img-content {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  width: 200rpx;
-  height: 200rpx;
-  border: 1px solid #fff;
-  transform-origin: 50% 50%;
-}
-.operation-box view {
-  position: absolute;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 40rpx;
-  height: 40rpx;
-  background: #fff;
-  border-radius: 50%;
-  border: 1px solid #B3AE9F;
-}
-.operation-box view image {
-  width: 20rpx;
-  height: 20rpx;
 }
 .close {
-  top: -40rpx;
-  left: -40rpx;
-}
-.rotate {
-  top: -40rpx;
-  right: -40rpx;
-}
-.flip {
-  bottom: -40rpx;
-  left: -40rpx;
-}
-.scale {
-  bottom: -40rpx;
-  right: -40rpx;
-}
-.canvas {
+  color: greenyellow;
+  width: 18px;
+  height: 18px;
   position: absolute;
-  left: 0;
-  top: -100000px;
-  z-index: -99;
+  z-index: 99;
+  left: -9px;
+  top: -9px;
 }
-.success-btn {
+.operation {
+  color: greenyellow;
+  width: 18px;
+  height: 18px;
   position: absolute;
-  right: 50rpx;
-  bottom: 50rpx;
+  z-index: 99;
+  right: -9px;
+  bottom: -9px;
 }

@@ -1,316 +1,241 @@
 // pages/main/main.js
-var ctx = wx.createCanvasContext('main-canvas',this)
+var itemList=[];
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    tmpImg:'',
-    imgWidth:'',
-    imgHeight:'',
-    originalWidth:'',   //图片真实宽度
-    originalHeight:'',   //图片真实高度
-    arrowPosition:'0%',
-    arrowRotate:'0deg',
-    imgArr:[
-      { src: '1.png', rotate: 0, flip: '0deg', scale: 1, top: 0, left: 0},
-      { src: '2.png', rotate: 0, flip: '0deg', scale: 1, top: 0, left: 0},
-      { src: '3.png', rotate: 0, flip: '0deg', scale: 1, top: 0, left: 0},
+    mainImg:{   //主图的信息
+      imgPath:'',
+      width:0,
+      height:0,
+      top:0,
+      left:0,
+      originWidth:0,
+      originHeight: 0
+    },
+    windowW:0,   //屏幕宽高
+    windowH:0,
+    arrowRotate:0,
+    stickerArr:[
+      { path: '1.png' },
+      { path: '2.png' },
+      { path: '3.png' }
     ],
-    choseImg:[],
-    imgIndex:null,
-    startX: null,
-    startY: null,
-    moveX: null,
-    moveY: null,
-    boxShow:false,  //操作头像贴纸的盒子 显示与否  
-    boxStyle: { top: 0, left: 0 },    //操作头像贴纸的盒子  样式
-    choseStartX:null,
-    choseStartY: null,
-    canvasW:0,
-    canvasH:0,
-    successImg:'',
-    successShow:false
+    mainImgArr:[]   //主要区域操作的贴纸
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    this.setData({    //设置图片路径
-      tmpImg:options.img
+    console.log(options)
+    let tmpImgObj=this.data.mainImg;
+    tmpImgObj.imgPath=options.img;
+    this.setData({
+      mainImg:tmpImgObj
     })
-    wx.createSelectorQuery().select('.main').boundingClientRect().exec(ev=>{
-      // console.log(ev)
-      let tmpArr=this.data.imgArr;
-      tmpArr.map(item=>{
-        item.top = ev[0].height / 2;
-        item.left = ev[0].width / 2;
-      })
-      this.setData({
-        imgArr:tmpArr
-      })
+    wx.getSystemInfo({   
+      success: res=> {
+        this.setData({
+          windowH:res.windowHeight,
+          windowW:res.windowWidth
+        })
+        this.setMainImg()
+      },
     })
+
   },
 
-  mainImgLoad(e){    //图片加载完执行该函数
-    var query=wx.createSelectorQuery();
-    var tmpWidth = e.detail.width;
-    var tmpHeight = e.detail.height;
-    console.log(e.detail)
-    var _this=this;
+  //获取主图信息
+  setMainImg() {
+    let tmpImgObj=this.data.mainImg;
+    wx.getImageInfo({
+      src: tmpImgObj.imgPath,
+      success:res=>{
+        console.log(res)
+        tmpImgObj.originWidth=res.width;
+        tmpImgObj.originHeight = res.height;
 
-    query.select('.main-content').boundingClientRect().exec(ev=>{
-      // console.log(ev)
-      this.setData({
-        originalHeight: e.detail.height,    //设置图片原大小
-        originalWidth: e.detail.width,
-
-        imgWidth:ev[0].width,      //设置图片的显示大小，使其自适应
-        // 变量分别为：图片原高度，外层view宽度即屏幕宽度，图片原宽度
-        imgHeight: tmpHeight * ev[0].width/tmpWidth
-
-      })
+        tmpImgObj.width=this.data.windowW;   //自适应宽
+        //自适应高
+        tmpImgObj.height = tmpImgObj.originHeight * this.data.windowW / tmpImgObj.originWidth;   
+        //自适应top值
+        tmpImgObj.top=(this.data.windowH-tmpImgObj.originHeight*this.data.windowW/tmpImgObj.originWidth)/2;
+        this.setData({
+          mainImg:tmpImgObj
+        })
+      }
     })
-
-
-    this.drawMain(this.data.tmpImg, e.detail.width, e.detail.height)
   },
-  changeArrow(){  //贴纸素材容器的样式
-    if (this.data.arrowPosition==='0%'){
+  
+  changeArrow(){   //贴纸素材的样式改变
+    if(this.data.arrowRotate==='180deg'){
       this.setData({
-        arrowPosition:'80%',
-        arrowRotate:'180deg'
+        arrowRotate:'0deg'
       })
     }else{
       this.setData({
-        arrowPosition: '0%',
-        arrowRotate: '0deg'
+        arrowRotate: '180deg'
       })
     }
   },
-  selectImg(e){  //从素材中选择贴纸，在显示到主要区域中
-    // console.log(e)
-    let tmpArr = this.data.choseImg;
 
-    let tmpImg = JSON.parse(JSON.stringify(this.data.imgArr));   //拷贝数组的一种技巧，防止修改数据时把源数据也一起修改了
-    tmpArr.push(tmpImg[e.target.dataset.index]);
-    this.setData({
-      choseImg: tmpArr,
-      boxShow:true
+  selectSticker(e){   //从底部的贴纸素材选择贴纸添加到主要区域中
+    var index=e.target.dataset.index;
+    itemList.push({
+      path: this.data.stickerArr[index].path,
+      top: this.data.windowH/2-50,
+      left: this.data.windowW/2-50,
+      x: this.data.windowW / 2,
+      y: this.data.windowH / 2,
+      scale: 1,   //缩放比例
+      angle: 0,   //旋转角度
+      rotate: 1,  //旋转值
+      active:false,   
+      width: 100,
+      height: 100,
     })
-    if(this.data.choseImg.length>0){
-      this.setData({
-        imgIndex:this.data.choseImg.length-1,
-      })
-      wx.createSelectorQuery().select(`#choseImg${this.data.imgIndex}`).boundingClientRect().exec(ev=>{
-        // console.log(ev)
-        let tmpObj={
-          top:ev[0].top-6,
-          left: ev[0].left-5,
-        }
-        this.setData({
-          boxStyle:tmpObj  
-        })
-      })
-    }
-  },
-  choseImgLoad(e){
-    // console.log(e)
+    console.log(itemList)
     this.setData({
-      imgIndex: e.target.dataset.index
+      mainImgArr:itemList
     })
   },
-  closeChoseImg() {   //删除已选择的头像贴纸
-    let tmpArr=this.data.choseImg;
-    tmpArr.splice(this.data.imgIndex,1);
-   
-    this.setData({
-      choseImg:tmpArr,
-      imgIndex: this.data.imgIndex-1
-    })
-    // let tmpArr = this.data.choseImg;
-    if(this.data.imgIndex>=0){
-      let tmpObj = {
-        top: tmpArr[this.data.imgIndex].top - 50,
-        left: tmpArr[this.data.imgIndex].left - 50,
+  WraptouchStart(e){   //点击图片   记录此时的x,y值
+    var index = e.target.dataset.index;
+    for(let i=0;i<itemList.length;i++){
+      itemList[i].active=false;
+      if(index===i){
+        itemList[index].active=true;   //开启可操作状态
       }
-      this.setData({
-        boxStyle: tmpObj
-      })
+    }
+    itemList[index].lx = e.touches[0].clientX;   //记录x,y值
+    itemList[index].ly = e.touches[0].clientY;
+
+    this.setData({
+      mainImgArr:itemList
+    })
+  },
+  WraptouchMove(e){  //图片开始移动
+    var index = e.target.dataset.index;
+
+    //图片移动时的坐标页写在属性里面
+    itemList[index]._lx = e.touches[0].clientX;
+    itemList[index]._ly = e.touches[0].clientY;
+
+    itemList[index].left += itemList[index]._lx - itemList[index].lx;
+    itemList[index].top += itemList[index]._ly - itemList[index].ly;
+    itemList[index].x += itemList[index]._lx - itemList[index].lx;
+    itemList[index].y += itemList[index]._ly - itemList[index].ly;
+
+
+    itemList[index].lx = e.touches[0].clientX;
+    itemList[index].ly = e.touches[0].clientY;
+
+    this.setData({
+      mainImgArr:itemList
+    })
+  },
+  WraptouchEnd(e) {
+    //console.log('end',items)
+  },
+
+  deleteItem(e){  //删除主要区域的头像素材贴纸
+    var index = e.target.dataset.index;
+    itemList.splice(index,1);
+    this.setData({
+      mainImgArr:itemList
+    })
+  },
+
+  touchStart(e){
+    var index=e.target.dataset.index;
+    itemList[index].active=true;
+
+    //获取作为移动前角度的坐标 
+    itemList[index].tx = e.touches[0].clientX;
+    itemList[index].ty = e.touches[0].clientY;
+
+    itemList[index].anglePre = this.countDeg(itemList[index].x, itemList[index].y, itemList[index].tx, itemList[index].ty)
+    itemList[index].r = this.getDistancs(itemList[index].x, itemList[index].y, itemList[index].left, itemList[index].top)
+  },
+  touchMove(e){
+
+    var index = e.target.dataset.index;
+    itemList[index]._tx = e.touches[0].clientX;
+    itemList[index]._ty = e.touches[0].clientY;
+    //移动的点到圆心的距离  
+    itemList[index].disPtoO = this.getDistancs(itemList[index].x, itemList[index].y, itemList[index]._tx - this.data.windowW * 0.125, itemList[index]._ty - 10)
+    // console.log(itemList[index].rotate)
+
+    //手指滑动的点到圆心的距离与半径的比值作为图片的放大比例  
+    itemList[index].scale = itemList[index].disPtoO / itemList[index].r;
+    // console.log(itemList[index].disPtoO / itemList[index].r)
+    if (Math.abs(itemList[index].scale) > 2) { //设置最大缩放为2倍
+      itemList[index].scale = 2;
+    }
+    if (Math.abs(itemList[index].scale) < 0.5) { //设置最小缩放为0.5倍
+      itemList[index].scale = 0.5;
+    }
+    //图片放大响应的右下角按钮同比缩小  
+    itemList[index].oScale = 1 / itemList[index].scale;
+
+    //移动后位置的角度  
+    itemList[index].angleNext = this.countDeg(itemList[index].x, itemList[index].y, itemList[index]._tx, itemList[index]._ty)
+    //角度差  
+    itemList[index].new_rotate = itemList[index].angleNext - itemList[index].anglePre;
+    //叠加的角度差  
+    // console.log(itemList[index].new_rotate, itemList[index].rotate)
+    itemList[index].rotate += itemList[index].new_rotate;
+    itemList[index].angle = itemList[index].rotate; //赋值  
+
+    //用过移动后的坐标赋值为移动前坐标  
+    itemList[index].tx = e.touches[0].clientX;
+    itemList[index].ty = e.touches[0].clientY;
+    itemList[index].anglePre = this.countDeg(itemList[index].x, itemList[index].y, itemList[index].tx, itemList[index].ty)
+
+    //赋值setData渲染  
+    this.setData({
+      mainImgArr: itemList
+    })
+  },
+  touchEnd: function (e) { },
+  /*  
+     *参数1和2为图片圆心坐标  
+     *参数3和4为手点击的坐标  
+     *返回值为手点击的坐标到圆心的角度  
+     */
+  countDeg: function (cx, cy, pointer_x, pointer_y) {
+    var ox = pointer_x - cx;
+    var oy = pointer_y - cy;
+    var to = Math.abs(ox / oy);
+    //鼠标相对于旋转中心的角度  
+    var angle = Math.atan(to) / (2 * Math.PI) * 360;
+    //console.log("ox.oy:", ox, oy, angle)
+    if (ox < 0 && oy < 0)//相对在左上角，第四象限，js中坐标系是从左上角开始的，这里的象限是正常坐标系    
+    {
+      angle = -angle;
+    } else if (ox <= 0 && oy >= 0)//左下角,3象限    
+    {
+      angle = -(180 - angle)
+    } else if (ox > 0 && oy < 0)//右上角，1象限    
+    {
+      angle = angle;
+    } else if (ox > 0 && oy > 0)//右下角，2象限    
+    {
+      angle = 180 - angle;
     }
 
-    if (this.data.choseImg.length===0){   //当主要的区域的头像贴纸数为0时，操作贴纸的盒子不显示
-      this.setData({
-        boxShow:false
-      })
-    }
+    return angle;
   },
-  flipChoseImg(){    //水平翻转头像贴纸
-    var query = wx.createSelectorQuery();
-    var _this=this;
-    query.select(`#choseImg${this.data.imgIndex}`).boundingClientRect().exec(function(ev){
-      // console.log(ev[0].dataset.index)
-      let tmp = _this.data.choseImg;
-      if (tmp[ev[0].dataset.index].flip === '180deg'){
-        tmp[ev[0].dataset.index].flip = '0deg';
-      }else{
-        tmp[ev[0].dataset.index].flip = '180deg'
-      }
-      _this.setData({
-        choseImg:tmp
-      })
-    })
-  },
-  rotateChoseImg() {
-
-  },
-  rotateStart(e) {  
-    this.setData({
-      startX: e.changedTouches[0].pageX,
-      startY: e.changedTouches[0].pageY,
-    })
-  },
-  rotateImgMove(e) {   //旋转时手指的滑动
-    var query = wx.createSelectorQuery();
-    var _this = this;
-    let pageX=e.changedTouches[0].pageX;
-    let pageY = e.changedTouches[0].pageY;
-    query.select(`#choseImg${this.data.imgIndex}`).boundingClientRect().exec(function (ev) {
-      let tmp = _this.data.choseImg;
-      tmp[ev[0].dataset.index].rotate = Math.atan2(pageY - _this.data.startY, pageX  - _this.data.startX  ) / Math.PI * 180
-      _this.setData({
-        choseImg: tmp,
-        moveX:pageX,
-        moveY:pageY
-      })
-    })
-  },
-  scaleChoseImg(e){   //放大头像贴纸
-    var query = wx.createSelectorQuery();
-    let tmp=this.data.choseImg;
-    var _this = this;
-    query.select(`#choseImg${this.data.imgIndex}`).boundingClientRect().exec(function (ev) {
-      let tmp = _this.data.choseImg;
-      if (e.touches[0].pageX>_this.data.moveX && e.touches[0].pageY>_this.data.moveY){
-        // console.log('dd')
-        tmp[ev[0].dataset.index].scale += 0.01
-      }else{
-        tmp[ev[0].dataset.index].scale -= 0.01 
-      }
-      _this.setData({
-        choseImg: tmp,
-        moveX: e.touches[0].pageX,
-        moveY: e.touches[0].pageY
-      })
-    })
-    return false;
-  },
-  choseImgStart(e) {
-    // console.log(e)
-    this.setData({
-      choseStartX: e.touches[0].pageX,
-      choseStartY: e.touches[0].pageY,
-    })
-  },
-  choseImgMove(e) {   //头像贴纸移动，所在的白色框的盒子也一起移动
-    // console.log(e)
-    let tmpObj={
-      top: e.touches[0].pageY-45,
-      left: e.touches[0].pageX-45
-    }
-    let tmpArr=this.data.choseImg;
-    tmpArr[this.data.imgIndex].top = e.touches[0].pageY+6;
-    tmpArr[this.data.imgIndex].left = e.touches[0].pageX+5;
-    this.setData({
-      boxStyle:tmpObj,
-      choseImg:tmpArr
-    })
-    return false;
-  },
-  selectChoseImg(e){   //点击已选择头像贴纸，让白色框的盒子的位置等于所点击的头像贴纸的位置
-    let tmpArr=this.data.choseImg;
-    let tmpObj={
-      top: tmpArr[e.target.dataset.index].top-50,
-      left: tmpArr[e.target.dataset.index].left-50,
-    }
-    this.setData({
-      boxShow:true,
-      imgIndex:e.target.dataset.index,
-      boxStyle:tmpObj
-    })
-  },
-  hideBox() {   //点击主图时 隐藏白色框的盒子
-    this.setData({
-      boxShow:false
-    })
-  },
-  drawMain(imgSrc,imgWidth,imgHeight){   //画主图
-    let canvasW = 0;
-    let canvasH = 0;
-    wx.createSelectorQuery().select('.canvas').boundingClientRect().exec(ev=>{
-      this.setData({
-        canvasW: ev[0].width,
-        canvasH: ev[0].height
-      })
-      // ctx.drawImage(imgSrc, 0, (ev[0].height-imgHeight*ev[0].width/imgWidth)/2,ev[0].width,imgHeight*ev[0].width/imgWidth);
-      ctx.drawImage(imgSrc, 0, 0, imgWidth, imgHeight);
-
-      ctx.draw();
-    })
-  },
-  success(){
-    // ctx.clearRect();
-    // this.dw
-    wx.showLoading({
-      title: '生成图片中',
-    })
-    let tmpArr = this.data.choseImg;
-    for (let i = 0; i < tmpArr.length; i++) {
-      wx.getImageInfo({
-        src: `../../static/images/${tmpArr[i].src}`,
-        success: res => {
-          ctx.save();
-          ctx.translate(this.data.canvasW / 2, this.data.canvasH / 2);
-          ctx.rotate(45 * Math.PI / 180);
-          // ctx.scale(-1,1);
-
-          ctx.drawImage(`../../static/images/${tmpArr[i].src}`, (tmpArr[i].left - 45)*5.12, (tmpArr[i].top - 45), 90*5.12, 90*5.12);
-          ctx.translate(-this.data.canvasW / 2, -this.data.canvasH / 2);
-          
-          ctx.draw(true);
-          ctx.restore();
-          setTimeout(()=>{
-            console.log(this.data.originalHeight)
-            wx.canvasToTempFilePath({    //微信官方API，将canvas保存为图片并且存到相册
-              x:0,
-              y:0,
-              width: this.data.originalWidth,
-              height: 1080,  //测试数据，暂时定死
-              destWidth: this.data.originalWidth,
-              desHeight: 1080, //测试数据，暂时定死
-              canvasId: 'main-canvas',
-              success: res => {
-                wx.hideLoading();
-                console.log(res)
-                this.setData({
-                  successImg: res.tempFilePath,
-                  successShow: true
-                })
-                wx.navigateTo({
-                  url: '../success/success?imgPath='+res.tempFilePath,
-                })
-              }
-            }, this)
-          },1000)
-        },
-        fail: err => {
-          console.log(err)
-        }
-      })
-    }
-    
+  //计算触摸点到圆心的距离
+  getDistancs(cx, cy, pointer_x, pointer_y) {
+    var ox = pointer_x - cx;
+    var oy = pointer_y - cy;
+    return Math.sqrt(
+      ox * ox + oy * oy
+    );
   },
   /**
    * 生命周期函数--监听页面初次渲染完成
