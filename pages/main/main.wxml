@@ -4,7 +4,7 @@
     <image class='main-img' src='{{mainImg.imgPath}}' style='width:{{mainImg.width}}px;height:{{mainImg.height}}px;top:{{mainImg.top}}px;left:{{mainImg.left}}px;' bindtap='hideWhiteBox'></image>
     <!-- 主要操作贴纸的容器 -->
     <block wx:for="{{mainImgArr}}" wx:key="index">
-      <view class='img-content' style='transform: scale({{item.scale}});top:{{item.top}}px;left:{{item.left}}px; '>
+      <view class='img-content' style='top:{{item.top}}px;left:{{item.left}}px; '>
         <view class='bigBox {{item.active?"touchActive":""}}' style='transform:rotate({{item.rotate}}deg)'>
           <text hidden='{{item.active?false:true}}' class='close' style='transform: scale({{item.oScale}});transform-origin:center;' data-index='{{index}}' catchtap='deleteItem'></text>
           <!-- 贴纸图片 -->

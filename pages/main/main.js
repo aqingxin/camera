@@ -179,12 +179,16 @@ Page({
 
     //手指滑动的点到圆心的距离与半径的比值作为图片的放大比例  
     itemList[index].scale = itemList[index].disPtoO / itemList[index].r;
+    itemList[index].width = itemList[index].disPtoO / itemList[index].r*100;
+    itemList[index].height = itemList[index].disPtoO / itemList[index].r * 100;
     // console.log(itemList[index].disPtoO / itemList[index].r)
-    if (Math.abs(itemList[index].scale) > 2) { //设置最大缩放为2倍
-      itemList[index].scale = 2;
+    if (Math.abs(itemList[index].width) > 150) { //设置最大缩放为2倍
+      itemList[index].width=150;
+      itemList[index].height=150;
     }
-    if (Math.abs(itemList[index].scale) < 0.5) { //设置最小缩放为0.5倍
-      itemList[index].scale = 0.5;
+    if (Math.abs(itemList[index].width) < 30) { //设置最小缩放为0.5倍
+      itemList[index].width = 150;
+      itemList[index].height = 150;
     }
     //图片放大响应的右下角按钮同比缩小  
     itemList[index].oScale = 1 / itemList[index].scale;
@@ -252,7 +256,7 @@ Page({
     var proportion=this.data.mainImg.originWidth/this.data.mainImg.width;
     var proportionH = this.data.mainImg.originHeight / this.data.mainImg.height
     // var proportion=0.75;
-    // console.log(proportion)
+    console.log(proportion)
     ctx.drawImage(this.data.mainImg.imgPath, 0, 0, this.data.mainImg.originWidth, this.data.mainImg.originHeight);
     ctx.save();
     // ctx.draw();
@@ -264,10 +268,11 @@ Page({
 
       ctx.rotate(itemList[i].angle * Math.PI / 180);
 
-      ctx.scale(itemList[i].scale, itemList[i].scale);
+      // ctx.scale(itemList[i].scale, itemList[i].scale);
       ctx.translate(-this.data.mainImg.originWidth / 2, -this.data.mainImg.originHeight / 2);
       // ctx.drawImage(`../../static/images/${itemList[i].path}`, -(itemList[i].width * proportion / 2), -(itemList[i].height * proportion / 2), itemList[i].width * proportion, itemList[i].height * proportion);
-      ctx.drawImage(`../../static/images/${itemList[i].path}`, (itemList[i].left * proportion), ((itemList[i].top - this.data.mainImg.top) * proportionH ), itemList[i].width * proportion, itemList[i].height * proportion);
+      console.log((itemList[i].width/itemList[i].scale+itemList[i].left)*proportion)
+      ctx.drawImage(`../../static/images/${itemList[i].path}`, itemList[i].left * proportion, ((itemList[i].top - this.data.mainImg.top) * proportionH ), itemList[i].width * proportion, itemList[i].height * proportion);
       ctx.restore();
       ctx.save();
     }
