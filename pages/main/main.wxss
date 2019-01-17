@@ -65,3 +65,12 @@ page {
   right: -9px;
   bottom: -9px;
 }
+.save-btn {
+  position: absolute;
+  bottom: 80rpx;
+  right: 0;
+}
+.mycanvas {
+  position: absolute;
+  top: -100000vh;
+}

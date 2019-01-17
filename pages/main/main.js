@@ -1,5 +1,6 @@
 // pages/main/main.js
 var itemList=[];
+
 Page({
 
   /**
@@ -23,6 +24,7 @@ Page({
       { path: '2.png' },
       { path: '3.png' }
     ],
+    canvasImg:'../../static/images/1.png',
     mainImgArr:[]   //主要区域操作的贴纸
   },
 
@@ -92,12 +94,19 @@ Page({
       y: this.data.windowH / 2,
       scale: 1,   //缩放比例
       angle: 0,   //旋转角度
-      rotate: 1,  //旋转值
-      active:false,   
-      width: 100,
-      height: 100,
+      rotate: 0,  //旋转值
+      active:true,   
+      width: 80,
+      height: 80,
     })
-    console.log(itemList)
+    this.setData({
+      mainImgArr:itemList
+    })
+  },
+  hideWhiteBox(){
+    for(var i=0;i<itemList.length;i++){
+      itemList[i].active=false;
+    }
     this.setData({
       mainImgArr:itemList
     })
@@ -236,6 +245,66 @@ Page({
     return Math.sqrt(
       ox * ox + oy * oy
     );
+  },
+  saveCanvas(){
+    var ctx = wx.createCanvasContext('imgCanvas', this);
+    console.log('aa')
+    //比例
+    var proportion=this.data.mainImg.originWidth/this.data.mainImg.width;
+    // var proportion=0.75;
+    // console.log(proportion)
+    ctx.drawImage(this.data.mainImg.imgPath, 0, 0, this.data.mainImg.originWidth, this.data.mainImg.originHeight);
+    ctx.save();
+    // ctx.draw();
+    // ctx.setFillStyle('red')
+    // ctx.fillRect(10, 10, 150, 100)
+    for(let i=0;i<itemList.length;i++){
+      // ctx.translate(itemList[i].left * proportion + itemList[i].width * proportion / 2, itemList[i].top *proportion + itemList[i].height * proportion / 2);
+      ctx.translate(this.data.mainImg.originWidth / 2, this.data.mainImg.originHeight / 2);
+
+      ctx.rotate(itemList[i].angle * Math.PI / 180);
+
+      ctx.scale(itemList[i].scale, itemList[i].scale);
+      ctx.translate(-this.data.mainImg.originWidth / 2, -this.data.mainImg.originHeight / 2);
+      // ctx.drawImage(`../../static/images/${itemList[i].path}`, -(itemList[i].width * proportion / 2), -(itemList[i].height * proportion / 2), itemList[i].width * proportion, itemList[i].height * proportion);
+      ctx.drawImage(`../../static/images/${itemList[i].path}`, (itemList[i].left * proportion), ((itemList[i].top - this.data.mainImg.top) * proportion ), itemList[i].width * proportion, itemList[i].height * proportion);
+      ctx.restore();
+      ctx.save();
+    }
+    ctx.draw(true);
+    // ctx.restore();
+
+    setTimeout(()=>{
+      wx.canvasToTempFilePath({
+        x: 0,
+        y: 0,
+        width: this.data.mainImg.originWidth,
+        height: this.data.mainImg.originHeight,
+        desWidth: this.data.mainImg.originWidth,
+        desHeight: this.data.mainImg.originHeight,
+        canvasId: 'imgCanvas',
+        success: res => {
+          console.log(res)
+          this.setData({
+            canvasImg: res.tempFilePath
+          })
+          wx.saveImageToPhotosAlbum({
+            filePath: res.tempFilePath,
+            success: res => {
+              // console.log('ee')
+              console.log(res)
+
+            },
+            fail: err => {
+              console.log(err)
+            }
+          })
+        },
+        fail: err => {
+          console.log(err,1)
+        }
+      }, this)
+    },1000)
   },
   /**
    * 生命周期函数--监听页面初次渲染完成
