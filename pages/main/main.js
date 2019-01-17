@@ -187,8 +187,8 @@ Page({
       itemList[index].height=150;
     }
     if (Math.abs(itemList[index].width) < 30) { //设置最小缩放为0.5倍
-      itemList[index].width = 150;
-      itemList[index].height = 150;
+      itemList[index].width = 50;
+      itemList[index].height = 50;
     }
     //图片放大响应的右下角按钮同比缩小  
     itemList[index].oScale = 1 / itemList[index].scale;
