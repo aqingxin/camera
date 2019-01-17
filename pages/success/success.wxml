@@ -1,5 +1,12 @@
 <!--pages/success/success.wxml-->
 <view class='container'>
   <image class='main-img' src='{{imgInfo.imgPath}}' style='width:{{imgInfo.width}}px;height:{{imgInfo.height}}px;top:{{imgInfo.top}}px;left:{{imgInfo.left}}px;' ></image>
-  <button bindtap='save' class='save-btn'>保存到相册</button>
+  <view class='btn-block1' wx:if="{{pageType==='make'}}">
+    <button bindtap='save' class='save-btn'>保存到相册</button>
+    <button open-type='share' class='share'>分享照片</button>
+  </view>
+  <view class='btn-block2' wx:if="{{pageType==='share'}}">
+    <button bindtap='save' class='save'>保存照片</button>
+    <button class='me-too' bindtap='toIndex'>我也要拍</button>
+  </view>
 </view>

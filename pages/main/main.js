@@ -250,6 +250,7 @@ Page({
     console.log('aa')
     //比例
     var proportion=this.data.mainImg.originWidth/this.data.mainImg.width;
+    var proportionH = this.data.mainImg.originHeight / this.data.mainImg.height
     // var proportion=0.75;
     // console.log(proportion)
     ctx.drawImage(this.data.mainImg.imgPath, 0, 0, this.data.mainImg.originWidth, this.data.mainImg.originHeight);
@@ -266,7 +267,7 @@ Page({
       ctx.scale(itemList[i].scale, itemList[i].scale);
       ctx.translate(-this.data.mainImg.originWidth / 2, -this.data.mainImg.originHeight / 2);
       // ctx.drawImage(`../../static/images/${itemList[i].path}`, -(itemList[i].width * proportion / 2), -(itemList[i].height * proportion / 2), itemList[i].width * proportion, itemList[i].height * proportion);
-      ctx.drawImage(`../../static/images/${itemList[i].path}`, (itemList[i].left * proportion), ((itemList[i].top - this.data.mainImg.top) * proportion ), itemList[i].width * proportion, itemList[i].height * proportion);
+      ctx.drawImage(`../../static/images/${itemList[i].path}`, (itemList[i].left * proportion), ((itemList[i].top - this.data.mainImg.top) * proportionH ), itemList[i].width * proportion, itemList[i].height * proportion);
       ctx.restore();
       ctx.save();
     }
@@ -288,7 +289,7 @@ Page({
           // console.log(res.tempFilePath)
           wx.hideLoading();
           wx.navigateTo({
-            url: '../success/success?imgPath=' + res.tempFilePath,
+            url: '../success/success?imgPath=' + res.tempFilePath+'&type=make',
           })   
         },
         fail: err => {

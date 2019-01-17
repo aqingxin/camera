@@ -7,11 +7,29 @@
 .main-img {
   position: absolute;
 }
-.save-btn {
+.btn-block1,.btn-block2 {
   position: absolute;
-  bottom: 80rpx;
+  bottom: 75rpx;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.save-btn {
+  width: 45%;
   background: #FD4B95;
-  color: #fff
+  color: #fff;
+}
+.share {
+  width: 45%;
+}
+.save {
+  width: 35%;
+}
+.me-too {
+  width: 55%;
+  background: #FD4B95;
+  color: #fff;
 }
