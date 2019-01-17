@@ -5,7 +5,18 @@ Page({
    * 页面的初始数据
    */
   data: {
-    imgPath:''
+    imgPath:'',
+    imgInfo:{
+      imgPath: '',
+      width: 0,
+      height: 0,
+      top: 0,
+      left: 0,
+      originWidth: 0,
+      originHeight: 0
+    },
+    windowH:0,
+    windowW:0
   },
 
   /**
@@ -13,15 +24,55 @@ Page({
    */
   onLoad: function (options) {
     console.log(options)
-    this.setData({
-      imgPath:options.imgPath
+    let tmpImgObj = this.data.imgInfo;
+    tmpImgObj.imgPath = options.imgPath;
+    wx.getSystemInfo({
+      success: res => {
+        this.setData({
+          windowH: res.windowHeight,
+          windowW: res.windowWidth,
+          imgInfo: tmpImgObj
+        })
+        this.setMainImg()
+      },
+    })
+    
+  },
+  setMainImg() {
+    let tmpImgObj = this.data.imgInfo;
+    wx.getImageInfo({
+      src: tmpImgObj.imgPath,
+      success: res => {
+        console.log(res)
+        tmpImgObj.originWidth = res.width;
+        tmpImgObj.originHeight = res.height;
+
+        tmpImgObj.width = this.data.windowW;   //自适应宽
+        //自适应高
+        tmpImgObj.height = tmpImgObj.originHeight * this.data.windowW / tmpImgObj.originWidth;
+        //自适应top值
+        tmpImgObj.top = (this.data.windowH - tmpImgObj.originHeight * this.data.windowW / tmpImgObj.originWidth) / 2;
+        this.setData({
+          imgInfo: tmpImgObj
+        })
+      }
     })
   },
   save(){
     wx.saveImageToPhotosAlbum({
-      filePath: this.data.imgPath,
+      filePath: this.data.imgInfo.imgPath,
       success: res => {
-        console.log(res)
+        // console.log(res)
+        wx.showToast({
+          title:'保存成功',
+          icon:'none'
+        })
+      },
+      fail:err=>{
+        wx.showToast({
+          title: '保存失败',
+          icon: 'none'
+        })
       }
     })
     

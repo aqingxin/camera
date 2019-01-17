@@ -1,5 +1,5 @@
 <!--pages/success/success.wxml-->
-<view>
-  <image src='{{imgPath}}'></image>
-  <button bindtap='save'>下载</button>
+<view class='container'>
+  <image class='main-img' src='{{imgInfo.imgPath}}' style='width:{{imgInfo.width}}px;height:{{imgInfo.height}}px;top:{{imgInfo.top}}px;left:{{imgInfo.left}}px;' ></image>
+  <button bindtap='save' class='save-btn'>保存到相册</button>
 </view>

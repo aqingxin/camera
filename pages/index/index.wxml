@@ -1,7 +1,8 @@
 <!--index.wxml-->
 <view class="container">
+  <image class='homeBg' src='../../static/images/home.jpg' mode='widthFix'></image>
   <!-- <image class='picture' src="{{imageUrl}}" style='width:{{newW}}px;height:{{newH}}px;' mode='widthFix' bindload='imgLoad'></image> -->
-  <button bindtap='selectImg' class='selectImg'>拍摄我的卡漫相机</button>
+  <button bindtap='selectImg' class='selectImg'>拍摄我的动卡相机</button>
   <!-- <canvas style="width: 100vw; height: 100vh;" canvas-id="firstCanvas" class='canvas'></canvas> -->
   <!-- <button bindtap='saveImg'>保存图片</button> -->
   <!-- <svg></svg> -->

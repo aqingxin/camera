@@ -37,4 +37,12 @@
 .selectImg {
   position: absolute;
   bottom: 120rpx;
+  background: #FD4B95;
+  color: #fff;
+  border: 1px solid #000;
+}
+.homeBg {
+
+  width: 100vw;
+  /* height: 100vh; */
 }

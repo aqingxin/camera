@@ -24,7 +24,6 @@ Page({
       { path: '2.png' },
       { path: '3.png' }
     ],
-    canvasImg:'../../static/images/1.png',
     mainImgArr:[]   //主要区域操作的贴纸
   },
 
@@ -273,7 +272,9 @@ Page({
     }
     ctx.draw(true);
     // ctx.restore();
-
+    wx.showLoading({
+      title: '绘制图片中',
+    })
     setTimeout(()=>{
       wx.canvasToTempFilePath({
         x: 0,
@@ -283,22 +284,12 @@ Page({
         desWidth: this.data.mainImg.originWidth,
         desHeight: this.data.mainImg.originHeight,
         canvasId: 'imgCanvas',
-        success: res => {
-          console.log(res)
-          this.setData({
-            canvasImg: res.tempFilePath
-          })
-          wx.saveImageToPhotosAlbum({
-            filePath: res.tempFilePath,
-            success: res => {
-              // console.log('ee')
-              console.log(res)
-
-            },
-            fail: err => {
-              console.log(err)
-            }
-          })
+        success: res => {    
+          // console.log(res.tempFilePath)
+          wx.hideLoading();
+          wx.navigateTo({
+            url: '../success/success?imgPath=' + res.tempFilePath,
+          })   
         },
         fail: err => {
           console.log(err,1)

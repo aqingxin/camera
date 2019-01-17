@@ -2,7 +2,6 @@
   <view class='main'>
     <!-- 主图 -->
     <image class='main-img' src='{{mainImg.imgPath}}' style='width:{{mainImg.width}}px;height:{{mainImg.height}}px;top:{{mainImg.top}}px;left:{{mainImg.left}}px;' bindtap='hideWhiteBox'></image>
-    <image src='{{canvasImg}}'></image>
     <!-- 主要操作贴纸的容器 -->
     <block wx:for="{{mainImgArr}}" wx:key="index">
       <view class='img-content' style='transform: scale({{item.scale}});top:{{item.top}}px;left:{{item.left}}px; '>
@@ -28,5 +27,8 @@
     </view>
   </view>
   <canvas canvas-id='imgCanvas' class='mycanvas' style='width:{{mainImg.originWidth}}px;height:{{mainImg.originHeight}}px;'></canvas>
-  <button class='save-btn' bindtap='saveCanvas'>保存为图片</button>
+  <!-- <button class='save-btn' bindtap='saveCanvas'>保存为图片</button> -->
+  <view class='save-btn'>
+    <image src='../../static/images/save(1).png' bindtap='saveCanvas'></image>
+  </view>
 </view>
